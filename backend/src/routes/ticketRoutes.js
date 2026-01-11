@@ -6,7 +6,7 @@ import {
   getAllTickets,
   filterTickets,
   deleteTicket
-} from "../controllers/ticketController.js";
+} from "../controller/ticketController.js";
 
 const router = express.Router();
 
