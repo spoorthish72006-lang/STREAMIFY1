@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group@1.1.2";
+import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 
 import { cn } from "./utils";
 import { toggleVariants } from "./toggle";
@@ -57,3 +57,4 @@ function ToggleGroupItem({ className, children, variant, size, ...props }) {
 }
 
 export { ToggleGroup, ToggleGroupItem };
+

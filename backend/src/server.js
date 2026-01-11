@@ -1,6 +1,5 @@
 import express from 'express';
 import "dotenv/config";
-import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.js';
 import agentRoutes from './routes/agentRoutes.js';
 import metricsRoutes from './routes/metricsRoutes.js';
