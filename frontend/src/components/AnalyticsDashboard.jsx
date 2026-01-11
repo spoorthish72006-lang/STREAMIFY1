@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import {
   LineChart,
@@ -12,14 +12,31 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { callVolumeData, satisfactionData } from '../lib/mockData';
+import { callVolumeData, satisfactionData } from '../lib/mockData'; // Keeping for charts until backend sends time-series
 import { useTickets } from '../contexts/TicketContext';
+import { metricsApi } from '../lib/api';
 import { TrendingDown } from 'lucide-react';
 
 export function AnalyticsDashboard() {
   const { tickets } = useTickets();
+  const [metrics, setMetrics] = useState(null);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const data = await metricsApi.getMetrics();
+        setMetrics(data);
+      } catch (err) {
+        console.error("Failed to fetch metrics", err);
+      }
+    };
+    fetchMetrics();
+  }, []);
 
   const analytics = useMemo(() => {
+    // If we have API metrics, we could use them here, but for now maintaining local calculation based on tickets context
+    // or hybrid approach. 
+
     // Category breakdown
     const categoryBreakdown = tickets.reduce((acc, ticket) => {
       acc[ticket.category] = (acc[ticket.category] || 0) + 1;
@@ -66,12 +83,12 @@ export function AnalyticsDashboard() {
     return {
       categoryData,
       channelData,
-      avgResolutionTime,
+      avgResolutionTime: metrics?.avgResolutionTime || avgResolutionTime, // Prefer API if available
       mostCommonCategory: mostCommonCategory
         ? { name: mostCommonCategory[0], count: mostCommonCategory[1] }
         : { name: 'N/A', count: 0 }
     };
-  }, [tickets]);
+  }, [tickets, metrics]);
 
   return (
     <div className="space-y-6">

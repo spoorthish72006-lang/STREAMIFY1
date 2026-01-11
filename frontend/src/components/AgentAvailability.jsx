@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Progress } from './ui/progress';
+import { agentsApi } from '../lib/api';
 import {
   Users,
   Coffee,
@@ -9,17 +11,6 @@ import {
   CheckCircle2,
   XCircle
 } from 'lucide-react';
-
-const agents = [
-  { id: 1, name: 'Sarah Chen', status: 'available', calls: 12, avgTime: '4:32', satisfaction: 94, team: 'Accounts' },
-  { id: 2, name: 'Michael Torres', status: 'on-call', calls: 8, avgTime: '6:15', satisfaction: 89, team: 'Technical' },
-  { id: 3, name: 'Emily Watson', status: 'available', calls: 15, avgTime: '3:48', satisfaction: 96, team: 'Loans' },
-  { id: 4, name: 'David Kim', status: 'break', calls: 10, avgTime: '5:20', satisfaction: 88, team: 'Cards' },
-  { id: 5, name: 'Jessica Liu', status: 'on-call', calls: 9, avgTime: '4:55', satisfaction: 92, team: 'Accounts' },
-  { id: 6, name: 'Robert Johnson', status: 'available', calls: 11, avgTime: '4:10', satisfaction: 90, team: 'Technical' },
-  { id: 7, name: 'Amanda Martinez', status: 'offline', calls: 0, avgTime: '0:00', satisfaction: 0, team: 'Loans' },
-  { id: 8, name: 'Chris Anderson', status: 'on-call', calls: 13, avgTime: '5:45', satisfaction: 87, team: 'Cards' },
-];
 
 const teamStats = [
   { team: 'Accounts', total: 8, available: 3, onCall: 2, satisfaction: 91 },
@@ -87,6 +78,20 @@ function getStatusBadge(status) {
 }
 
 export function AgentAvailability() {
+  const [agents, setAgents] = useState([]);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const data = await agentsApi.getAgents();
+        setAgents(data);
+      } catch (error) {
+        console.error("Failed to fetch agents", error);
+      }
+    };
+    fetchAgents();
+  }, []);
+
   const availableCount = agents.filter(a => a.status === 'available').length;
   const onCallCount = agents.filter(a => a.status === 'on-call').length;
   const breakCount = agents.filter(a => a.status === 'break').length;

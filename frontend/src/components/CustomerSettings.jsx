@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -6,8 +7,57 @@ import { Switch } from './ui/switch';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
 import { Settings, Bell, Mail, Phone, Clock, Shield } from 'lucide-react';
+import { settingsApi } from '../lib/api';
+import { toast } from 'sonner';
 
 export function CustomerSettings() {
+  const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    smsAlerts: true,
+    desktopNotifications: false,
+    dailySummary: true,
+    primaryEmail: 'support@retailbank.com',
+    supportHotline: '+1 (800) 555-BANK',
+    backupEmail: 'escalation@retailbank.com',
+    twoFactorAuth: true
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await settingsApi.getSettings();
+        if (data) {
+          setSettings(prev => ({ ...prev, ...data }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch settings", error);
+        // Only show error if it's not a 401 (handled globally or ignored if not logged in yet)
+        if (error.response?.status !== 401) {
+           toast.error("Failed to load settings");
+        }
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleChange = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await settingsApi.updateSettings(settings);
+      toast.success("Settings saved successfully");
+    } catch (error) {
+      console.error("Failed to save settings", error);
+      toast.error("Failed to save settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -44,7 +94,10 @@ export function CustomerSettings() {
                   <Label>Email Notifications</Label>
                   <p className="text-slate-600">Receive ticket updates via email</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={settings.emailNotifications} 
+                  onCheckedChange={(c) => handleChange('emailNotifications', c)} 
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -52,7 +105,10 @@ export function CustomerSettings() {
                   <Label>SMS Alerts</Label>
                   <p className="text-slate-600">High priority ticket alerts</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={settings.smsAlerts} 
+                  onCheckedChange={(c) => handleChange('smsAlerts', c)} 
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -60,7 +116,10 @@ export function CustomerSettings() {
                   <Label>Desktop Notifications</Label>
                   <p className="text-slate-600">Browser push notifications</p>
                 </div>
-                <Switch />
+                <Switch 
+                   checked={settings.desktopNotifications} 
+                   onCheckedChange={(c) => handleChange('desktopNotifications', c)}
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -68,7 +127,10 @@ export function CustomerSettings() {
                   <Label>Daily Summary</Label>
                   <p className="text-slate-600">Daily performance report at 6 PM</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                   checked={settings.dailySummary} 
+                   onCheckedChange={(c) => handleChange('dailySummary', c)}
+                />
               </div>
             </div>
           </div>
@@ -94,9 +156,9 @@ export function CustomerSettings() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="support@bank.com"
+                    value={settings.primaryEmail}
+                    onChange={(e) => handleChange('primaryEmail', e.target.value)}
                     className="pl-10"
-                    defaultValue="support@retailbank.com"
                   />
                 </div>
               </div>
@@ -108,9 +170,9 @@ export function CustomerSettings() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    value={settings.supportHotline}
+                    onChange={(e) => handleChange('supportHotline', e.target.value)}
                     className="pl-10"
-                    defaultValue="+1 (800) 555-BANK"
                   />
                 </div>
               </div>
@@ -122,9 +184,9 @@ export function CustomerSettings() {
                   <Input
                     id="backup-email"
                     type="email"
-                    placeholder="backup@bank.com"
+                    value={settings.backupEmail}
+                    onChange={(e) => handleChange('backupEmail', e.target.value)}
                     className="pl-10"
-                    defaultValue="escalation@retailbank.com"
                   />
                 </div>
               </div>
@@ -191,7 +253,10 @@ export function CustomerSettings() {
                   <Label>Two-Factor Authentication</Label>
                   <p className="text-slate-600">Enhanced account security</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  checked={settings.twoFactorAuth} 
+                   onCheckedChange={(c) => handleChange('twoFactorAuth', c)}
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -221,8 +286,11 @@ export function CustomerSettings() {
       {/* Footer Actions */}
       <div className="flex justify-end gap-3 pt-4">
         <Button variant="outline">Reset to Defaults</Button>
-        <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-500/30">
-          Save Changes
+        <Button 
+          disabled={loading}
+          onClick={handleSave}
+          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-500/30">
+          {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </div>

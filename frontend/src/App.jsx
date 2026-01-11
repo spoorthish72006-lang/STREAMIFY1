@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TicketProvider } from './contexts/TicketContext';
 import { CustomerServiceDashboard } from './components/CustomerServiceDashboard';
 import { TicketManagement } from './components/TicketManagement';
@@ -11,6 +11,9 @@ import { CallVolumeOverview } from './components/CallVolumeOverview';
 import { Badge } from './components/ui/badge';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { authApi } from './lib/api';
 import {
   AlertCircle,
   LayoutDashboard,
@@ -22,7 +25,9 @@ import {
   Activity,
   PhoneCall,
   Menu,
-  X
+  X,
+  LogOut,
+  Loader2
 } from 'lucide-react';
 
 const navigationItems = [
@@ -36,7 +41,7 @@ const navigationItems = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
-function AppContent() {
+function AppContent({ user, onLogout }) {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -65,8 +70,6 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
-      <Toaster />
-
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-5 sticky top-0 z-20 shadow-sm">
         <div className="flex items-center justify-between">
@@ -80,22 +83,25 @@ function AppContent() {
               {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </Button>
             <div>
-              <h1 className="bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent hidden md:block">
                 Retail Bank Customer Service Portal
               </h1>
-              <p className="text-slate-600 mt-1">
-                Manage customer inquiries and improve satisfaction
-              </p>
+              <h1 className="bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent md:hidden">
+                Customer Service
+              </h1>
             </div>
           </div>
 
-          <Badge
-            variant="destructive"
-            className="flex items-center gap-2 px-4 py-2 shadow-lg shadow-red-500/20"
-          >
-            <AlertCircle className="size-4" />
-            Satisfaction -12%
-          </Badge>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex flex-col items-end text-sm">
+               <span className="font-medium text-slate-700">{user.fullName}</span>
+               <span className="text-slate-500">{user.email}</span>
+            </div>
+            
+            <Button variant="ghost" size="icon" onClick={onLogout} title="Logout">
+              <LogOut className="size-5 text-slate-500 hover:text-red-500" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -157,9 +163,63 @@ function AppContent() {
 }
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [authView, setAuthView] = useState('login'); // 'login' or 'signup'
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const userData = await authApi.check();
+        setUser(userData);
+      } catch (error) {
+        // Not authenticated
+        console.log("User not authenticated");
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="size-10 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <Toaster />
+        {authView === 'login' ? (
+          <LoginPage onLogin={handleLogin} onSwitchToSignup={() => setAuthView('signup')} />
+        ) : (
+          <SignupPage onLogin={handleLogin} onSwitchToLogin={() => setAuthView('login')} />
+        )}
+      </>
+    );
+  }
+
   return (
     <TicketProvider>
-      <AppContent />
+      <Toaster />
+      <AppContent user={user} onLogout={handleLogout} />
     </TicketProvider>
   );
 }
