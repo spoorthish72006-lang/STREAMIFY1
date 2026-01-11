@@ -12,7 +12,9 @@ export function TicketProvider({ children }) {
     try {
       setLoading(true);
       const data = await ticketsApi.getAllTickets();
-      setTickets(data);
+      // Ensure data is an array and map _id to id if missing
+      const mappedData = Array.isArray(data) ? data.map(t => ({...t, id: t._id || t.id})) : [];
+      setTickets(mappedData);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch tickets:", err);
@@ -29,12 +31,13 @@ export function TicketProvider({ children }) {
   const addTicket = async (ticketData) => {
     try {
       // Optimistic update could go here, but for now we'll wait for server
-      const newTicket = await ticketsApi.createTicket({
+      const response = await ticketsApi.createTicket({
         ...ticketData,
         status: 'open',
         waitTime: 0,
         createdAt: new Date().toISOString()
       });
+      const newTicket = { ...response, id: response._id || response.id };
       setTickets(prev => [newTicket, ...prev]);
       return newTicket;
     } catch (err) {

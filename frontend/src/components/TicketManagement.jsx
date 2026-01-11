@@ -30,9 +30,9 @@ export function TicketManagement() {
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch =
-      ticket.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.id.toLowerCase().includes(searchQuery.toLowerCase());
+      (ticket.customerName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.subject || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.id || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
@@ -276,13 +276,14 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
   const [satisfactionScore, setSatisfactionScore] = useState(5);
 
   const formatDate = (date) => {
+    const dateObj = new Date(date);
     const now = new Date();
-    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMs = now.getTime() - dateObj.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   };
 
   const handleResolve = () => {

@@ -5,9 +5,9 @@ import { Phone, Clock, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-r
 import { useTickets } from '../contexts/TicketContext';
 
 export function CustomerServiceDashboard() {
-  const { tickets } = useTickets();
+  const { tickets = [] } = useTickets();
   
-  const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in-progress');
+  const openTickets = (tickets || []).filter(t => t.status === 'open' || t.status === 'in-progress');
   const avgWaitTime = openTickets.length > 0 
     ? Math.round(openTickets.reduce((acc, t) => acc + t.waitTime, 0) / openTickets.length)
     : 0;
@@ -15,19 +15,20 @@ export function CustomerServiceDashboard() {
   const resolvedToday = tickets.filter(t => {
     const today = new Date().toDateString();
     return (t.status === 'resolved' || t.status === 'closed') && 
-           t.createdAt.toDateString() === today;
+           new Date(t.createdAt).toDateString() === today;
   }).length;
   const avgSatisfaction = 3.96;
   const satisfactionChange = -12;
 
   const formatDate = (date) => {
+    const dateObj = new Date(date);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const diffMs = now.getTime() - dateObj.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
