@@ -1,0 +1,16 @@
+- [ ] Complete rest of the endpoints for backend (after authentication flow)
+    - [ ] Assign Task Endpoint
+    - [ ] Create Ticket Endpoint
+    - [ ] Filter & Search Ticket Endpont
+    - [ ] Show All Ticket Endpoint
+    - [ ] Delete Ticket
+    - [ ] Matric Endpoint
+    - [ ] Agent Endpoint
+    - [ ] Live Monitor Endpoint
+    - [ ] Notification Preference Endpoint (Setting)
+    - [ ] Contact Settings Endpoint (Setting)
+    - [ ] Business Hours Endpoint (Settings)
+    - [ ] Security & Privacy Endpoint (Settings)
+- [ ] Migrate the figma design to the app
+- [ ] Complete integrating frontend UI with the backend (using axios)
+- [ ] Complete end-to-end testing for the entire app
