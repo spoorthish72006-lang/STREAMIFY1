@@ -1,4 +1,4 @@
-import { cn } from "./utils";
+import { cn } from "@/lib/utils";
 
 function Skeleton({ className, ...props }) {
   return (
@@ -11,4 +11,5 @@ function Skeleton({ className, ...props }) {
 }
 
 export { Skeleton };
+
 

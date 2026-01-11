@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 
-import { cn } from "./utils";
+import { cn } from "@/lib/utils";
 
 function HoverCard(props) {
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />;
@@ -38,4 +38,5 @@ function HoverCardContent({ className, align = "center", sideOffset = 4, ...prop
 }
 
 export { HoverCard, HoverCardTrigger, HoverCardContent };
+
 

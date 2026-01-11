@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "./utils";
+import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }) {
   return (
@@ -110,4 +110,5 @@ export {
   TableCell,
   TableCaption,
 };
+
 
