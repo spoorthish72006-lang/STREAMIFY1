@@ -21,17 +21,17 @@ export function TicketManagement() {
   const [formData, setFormData] = useState({
     customerName: '',
     customerId: '',
-    subject: '',
+    title: '',
     category: 'general',
     priority: 'medium',
     channel: 'phone',
-    notes: ''
+    description: ''
   });
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch =
       (ticket.customerName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (ticket.subject || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (ticket.id || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
@@ -39,7 +39,7 @@ export function TicketManagement() {
   });
 
   const handleCreateTicket = () => {
-    if (!formData.customerName || !formData.subject) {
+    if (!formData.customerName || !formData.title) {
       toast.error('Please fill in required fields');
       return;
     }
@@ -47,22 +47,22 @@ export function TicketManagement() {
     addTicket({
       customerId: formData.customerId || `CUST-${Math.floor(Math.random() * 9999)}`,
       customerName: formData.customerName,
-      subject: formData.subject,
+      title: formData.title,
       category: formData.category,
       priority: formData.priority,
       channel: formData.channel,
-      notes: formData.notes,
+      description: formData.description,
       status: 'open'
     });
 
     setFormData({
       customerName: '',
       customerId: '',
-      subject: '',
+      title: '',
       category: 'general',
       priority: 'medium',
       channel: 'phone',
-      notes: ''
+      description: ''
     });
 
     setIsDialogOpen(false);
@@ -81,10 +81,10 @@ export function TicketManagement() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'resolved':
-      case 'closed': return 'bg-green-100 text-green-800';
-      case 'in-progress': return 'bg-blue-100 text-blue-800';
-      case 'waiting': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'closed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'in-progress': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'waiting': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default: return 'bg-slate-100 text-slate-800 border-slate-200';
     }
   };
 
@@ -128,10 +128,10 @@ export function TicketManagement() {
                   <div>
                     <Label className="text-slate-700">Subject *</Label>
                     <Input
-                      placeholder="Brief description"
+                      placeholder="Brief description of the issue"
                       className="mt-1 text-slate-900 placeholder:text-slate-400"
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -189,12 +189,12 @@ export function TicketManagement() {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-slate-700">Notes</Label>
+                    <Label className="text-slate-700">Notes/Description</Label>
                     <Textarea
                       placeholder="Additional details"
                       className="mt-1 text-slate-900 placeholder:text-slate-400"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
                   </div>
                   <Button className="w-full text-slate-900" onClick={handleCreateTicket}>
@@ -276,6 +276,7 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
   const [satisfactionScore, setSatisfactionScore] = useState(5);
 
   const formatDate = (date) => {
+    if (!date) return '';
     const dateObj = new Date(date);
     const now = new Date();
     const diffMs = now.getTime() - dateObj.getTime();
@@ -300,39 +301,78 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all border-slate-200 shadow-md bg-white">
+    <Card className="hover:shadow-lg transition-all border-slate-200 shadow-md bg-white group">
       <CardContent className="pt-6">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-slate-900">{ticket.id}</span>
-              <Badge variant={getPriorityColor(ticket.priority)} className="shadow-sm">{ticket.priority}</Badge>
-              <Badge className={getStatusColor(ticket.status) + " shadow-sm"}>{ticket.status}</Badge>
-              <Badge variant="outline" className="capitalize border-slate-300">{ticket.category}</Badge>
-            </div>
-            <h3 className="text-slate-900">{ticket.customerName}</h3>
-            <p className="text-slate-700">{ticket.subject}</p>
-            <p className="text-slate-500">{ticket.notes}</p>
-            <div className="flex items-center gap-4 text-slate-500 flex-wrap">
-              <div className="flex items-center gap-1">
-                <Clock className="size-4" />
-                <span>Wait: {ticket.waitTime}m</span>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="flex items-start justify-between">
+              <div>
+                 {/* Title & Status */}
+                 <div className="flex items-center gap-3 flex-wrap mb-1">
+                    <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      {ticket.title || ticket.subject || 'Untitled Ticket'}
+                    </h3>
+                    <Badge className={getStatusColor(ticket.status) + " shadow-none font-normal"}>
+                      {ticket.status}
+                    </Badge>
+                    <Badge variant={getPriorityColor(ticket.priority)} className="shadow-none font-normal">
+                      {ticket.priority}
+                    </Badge>
+                 </div>
+                 
+                 {/* Secondary Meta Data */}
+                 <div className="flex items-center gap-3 text-sm text-slate-500 flex-wrap">
+                    <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                      ID: {ticket.id}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <User className="size-3.5" />
+                      {ticket.customerName || 'Unknown Customer'}
+                    </span>
+                    {ticket.assignedTo && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1 text-slate-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                          <User className="size-3.5" />
+                          {typeof ticket.assignedTo === 'object' ? ticket.assignedTo.name : ticket.assignedTo}
+                        </span>
+                      </>
+                    )}
+                 </div>
               </div>
-              {ticket.assignedTo && (
-                <div className="flex items-center gap-1">
-                  <User className="size-4" />
-                  <span>{ticket.assignedTo}</span>
-                </div>
-              )}
-              <span className="capitalize">{ticket.channel}</span>
-              <span>{formatDate(ticket.createdAt)}</span>
-              {ticket.satisfactionScore && <span>⭐ {ticket.satisfactionScore}/5</span>}
+            </div>
+
+            {/* Description & Extra Meta */}
+            <p className="text-slate-600 text-sm line-clamp-2 max-w-3xl">
+              {ticket.description || ticket.notes || 'No description provided.'}
+            </p>
+
+            <div className="flex items-center gap-4 text-xs text-slate-400 mt-2">
+               <div className="flex items-center gap-1">
+                <Clock className="size-3" />
+                <span>Created {formatDate(ticket.createdAt)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="size-3" />
+                <span>Wait: {ticket.waitTime || 0}m</span>
+              </div>
+              <span className="capitalize px-2 py-0.5 bg-slate-50 border border-slate-100 rounded">
+                Category: {ticket.category}
+              </span>
+               <span className="capitalize px-2 py-0.5 bg-slate-50 border border-slate-100 rounded">
+                Channel: {ticket.channel}
+              </span>
             </div>
           </div>
-          <div className="flex lg:flex-col gap-2">
+
+          {/* Quick Actions */}
+          <div className="flex lg:flex-col gap-2 min-w-[120px]">
             {ticket.status === 'open' && (
               <Button 
-                className="flex-1 lg:flex-none shadow-sm text-slate-900"
+                variant="outline"
+                size="sm"
+                className="flex-1 lg:flex-none shadow-sm text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
                 onClick={() => {
                   onAssign(ticket.id, `Agent ${Math.floor(Math.random() * 7) + 1}`);
                   toast.success('Ticket assigned');
