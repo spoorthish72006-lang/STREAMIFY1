@@ -10,6 +10,7 @@ import { LiveMonitoring } from './components/LiveMonitoring';
 import { CallVolumeOverview } from './components/CallVolumeOverview';
 import { AgentDashboard } from './components/AgentDashboard';
 import { AgentTicketManagement } from './components/AgentTicketManagement';
+import { AgentList } from './components/AgentList';
 import { Badge } from './components/ui/badge';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
@@ -38,7 +39,7 @@ const adminNavigationItems = [
   { id: 'tickets', label: 'Tickets', icon: Ticket },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'satisfaction', label: 'Satisfaction', icon: Star },
-  { id: 'agents', label: 'Agent Availability', icon: Users },
+  { id: 'agents', label: 'Agents', icon: Users },
   { id: 'monitoring', label: 'Live Monitoring', icon: Activity },
   { id: 'call-volume', label: 'Call Volume', icon: PhoneCall },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -86,7 +87,7 @@ function AppContent({ user, onLogout }) {
       case 'satisfaction':
         return <SatisfactionTracking />;
       case 'agents':
-        return <AgentAvailability />;
+        return <AgentList />;
       case 'monitoring':
         return <LiveMonitoring />;
       case 'call-volume':
