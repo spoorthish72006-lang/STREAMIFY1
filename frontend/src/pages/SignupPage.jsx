@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
-import { Lock, Mail, User, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Lock, Mail, User, Loader2, Briefcase } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { toast } from 'sonner';
 
@@ -12,7 +13,8 @@ export function SignupPage({ onLogin, onSwitchToLogin }) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'agent'
   });
 
   const handleSubmit = async (e) => {
@@ -21,13 +23,6 @@ export function SignupPage({ onLogin, onSwitchToLogin }) {
     try {
       const response = await authApi.signup(formData);
       toast.success("Account created successfully!");
-      // The backend response structure for signup currently returns { success: true, newUser: ... }
-      // But the api client interceptor returns response.data directly.
-      // Need to normalize what we pass to onLogin.
-      // Looking at auth.controller.js, signup returns 201 with { success: true, newUser: ... }
-      // Login returns 200 with user object directly.
-      // We should probably rely on the cookie being set and maybe auto-login or just redirect.
-      // For consistency, let's assume we can just use the newUser object or fetch checkAuth.
       if (response.newUser) {
           onLogin(response.newUser);
       } else {
@@ -43,7 +38,7 @@ export function SignupPage({ onLogin, onSwitchToLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 w-screen">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
@@ -85,6 +80,23 @@ export function SignupPage({ onLogin, onSwitchToLogin }) {
               </div>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <div className="relative">
+                 <Select
+                    value={formData.role}
+                    onValueChange={(value) => setFormData({ ...formData, role: value })}
+                  >
+                    <SelectTrigger className="pl-10 w-full">
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="agent">Support Agent</SelectItem>
+                      <SelectItem value="admin">Administrator</SelectItem>
+                    </SelectContent>
+                  </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 size-4 text-slate-400" />
@@ -101,7 +113,7 @@ export function SignupPage({ onLogin, onSwitchToLogin }) {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-4 mt-4">
             <Button 
               type="submit" 
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"

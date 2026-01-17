@@ -5,30 +5,25 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
 import { useTickets } from '../contexts/TicketContext';
-import { Search, Plus, Clock, User, Trash2, CheckCircle } from 'lucide-react';
+import { Search, Clock, User, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function TicketManagement() {
-  const { tickets, addTicket, assignTicket, resolveTicket, deleteTicket } = useTickets();
+export function AgentTicketManagement({ user }) {
+  const { tickets, resolveTicket } = useTickets();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    customerName: '',
-    customerId: '',
-    title: '',
-    category: 'general',
-    priority: 'medium',
-    channel: 'phone',
-    description: ''
+  // Filter for agent's assigned tickets
+  const agentName = user?.fullName || 'Agent'; 
+  const myTickets = tickets.filter(t => {
+     if (!t.assignedTo) return false;
+     if (typeof t.assignedTo === 'object') return t.assignedTo.name === agentName;
+     return t.assignedTo === agentName;
   });
 
-  const filteredTickets = tickets.filter(ticket => {
+  const filteredTickets = myTickets.filter(ticket => {
     const matchesSearch =
       (ticket.customerName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (ticket.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -37,37 +32,6 @@ export function TicketManagement() {
     const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
   });
-
-  const handleCreateTicket = () => {
-    if (!formData.customerName || !formData.title) {
-      toast.error('Please fill in required fields');
-      return;
-    }
-
-    addTicket({
-      customerId: formData.customerId || `CUST-${Math.floor(Math.random() * 9999)}`,
-      customerName: formData.customerName,
-      title: formData.title,
-      category: formData.category,
-      priority: formData.priority,
-      channel: formData.channel,
-      description: formData.description,
-      status: 'open'
-    });
-
-    setFormData({
-      customerName: '',
-      customerId: '',
-      title: '',
-      category: 'general',
-      priority: 'medium',
-      channel: 'phone',
-      description: ''
-    });
-
-    setIsDialogOpen(false);
-    toast.success('Ticket created successfully');
-  };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -90,119 +54,11 @@ export function TicketManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Filters & New Ticket */}
+      {/* Filters */}
       <Card className="shadow-md border-slate-200">
         <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-slate-900">All Tickets ({filteredTickets.length})</CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="shadow-sm text-slate-900">
-                  <Plus className="size-4 mr-2" />
-                  New Ticket
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle className="text-slate-900">Create New Ticket</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  <div>
-                    <Label className="text-slate-700">Customer Name *</Label>
-                    <Input
-                      placeholder="Enter customer name"
-                      className="mt-1 text-slate-900 placeholder:text-slate-400"
-                      value={formData.customerName}
-                      onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-slate-700">Customer ID</Label>
-                    <Input
-                      placeholder="Auto-generated if empty"
-                      className="mt-1 text-slate-900 placeholder:text-slate-400"
-                      value={formData.customerId}
-                      onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-slate-700">Subject *</Label>
-                    <Input
-                      placeholder="Brief description of the issue"
-                      className="mt-1 text-slate-900 placeholder:text-slate-400"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-slate-700">Category</Label>
-                      <Select
-                        value={formData.category}
-                        onValueChange={(value) => setFormData({ ...formData, category: value })}
-                      >
-                        <SelectTrigger className="mt-1 text-slate-900">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="account">Account</SelectItem>
-                          <SelectItem value="transaction">Transaction</SelectItem>
-                          <SelectItem value="loan">Loan</SelectItem>
-                          <SelectItem value="card">Card</SelectItem>
-                          <SelectItem value="general">General</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-slate-700">Priority</Label>
-                      <Select
-                        value={formData.priority}
-                        onValueChange={(value) => setFormData({ ...formData, priority: value })}
-                      >
-                        <SelectTrigger className="mt-1 text-slate-900">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-slate-700">Channel</Label>
-                    <Select
-                      value={formData.channel}
-                      onValueChange={(value) => setFormData({ ...formData, channel: value })}
-                    >
-                      <SelectTrigger className="mt-1 text-slate-900">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="phone">Phone</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="chat">Chat</SelectItem>
-                        <SelectItem value="in-person">In-Person</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-slate-700">Notes/Description</Label>
-                    <Textarea
-                      placeholder="Additional details"
-                      className="mt-1 text-slate-900 placeholder:text-slate-400"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    />
-                  </div>
-                  <Button className="w-full text-slate-900" onClick={handleCreateTicket}>
-                    Create Ticket
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <CardTitle className="text-slate-900">My Tickets ({filteredTickets.length})</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
@@ -250,7 +106,7 @@ export function TicketManagement() {
         {filteredTickets.length === 0 ? (
           <Card className="shadow-md border-slate-200">
             <CardContent className="py-12 text-center text-slate-500">
-              No tickets found matching your criteria
+              No tickets found in your queue
             </CardContent>
           </Card>
         ) : (
@@ -260,9 +116,7 @@ export function TicketManagement() {
               ticket={ticket}
               getPriorityColor={getPriorityColor}
               getStatusColor={getStatusColor}
-              onAssign={assignTicket}
               onResolve={resolveTicket}
-              onDelete={deleteTicket}
             />
           ))
         )}
@@ -271,7 +125,7 @@ export function TicketManagement() {
   );
 }
 
-function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onResolve, onDelete }) {
+function TicketCard({ ticket, getPriorityColor, getStatusColor, onResolve }) {
   const [showResolveDialog, setShowResolveDialog] = useState(false);
   const [satisfactionScore, setSatisfactionScore] = useState(5);
 
@@ -291,13 +145,6 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
     onResolve(ticket.id, satisfactionScore);
     setShowResolveDialog(false);
     toast.success('Ticket resolved successfully');
-  };
-
-  const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this ticket?')) {
-      onDelete(ticket.id);
-      toast.success('Ticket deleted');
-    }
   };
 
   return (
@@ -330,15 +177,6 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
                       <User className="size-3.5" />
                       {ticket.customerName || 'Unknown Customer'}
                     </span>
-                    {ticket.assignedTo && (
-                      <>
-                        <span>•</span>
-                        <span className="flex items-center gap-1 text-slate-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                          <User className="size-3.5" />
-                          {typeof ticket.assignedTo === 'object' ? ticket.assignedTo.name : ticket.assignedTo}
-                        </span>
-                      </>
-                    )}
                  </div>
               </div>
             </div>
@@ -368,20 +206,7 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
 
           {/* Quick Actions */}
           <div className="flex lg:flex-col gap-2 min-w-[120px]">
-            {ticket.status === 'open' && (
-              <Button 
-                variant="outline"
-                size="sm"
-                className="flex-1 lg:flex-none shadow-sm text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
-                onClick={() => {
-                  onAssign(ticket.id, `Agent ${Math.floor(Math.random() * 7) + 1}`);
-                  toast.success('Ticket assigned');
-                }}
-              >
-                Assign
-              </Button>
-            )}
-            {ticket.status === 'in-progress' && (
+            {ticket.status !== 'resolved' && ticket.status !== 'closed' && (
               <Dialog open={showResolveDialog} onOpenChange={setShowResolveDialog}>
                 <DialogTrigger asChild>
                   <Button className="flex-1 lg:flex-none shadow-sm">
@@ -412,14 +237,6 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
                 </DialogContent>
               </Dialog>
             )}
-            <Button 
-              variant="outline" 
-              size="icon"
-              className="lg:w-full border-slate-300 hover:bg-red-50"
-              onClick={handleDelete}
-            >
-              <Trash2 className="size-4 text-red-600" />
-            </Button>
           </div>
         </div>
       </CardContent>

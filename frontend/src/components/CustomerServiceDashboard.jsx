@@ -135,31 +135,47 @@ export function CustomerServiceDashboard() {
       {/* Recent Activity */}
       <Card className="shadow-md border-slate-200">
         <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-          <CardTitle>Recent Ticket Activity</CardTitle>
+          <CardTitle className="text-slate-900">Recent Ticket Activity</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent>
           <div className="space-y-1">
             {tickets.slice(0, 5).map(ticket => (
-              <div key={ticket.id} className="flex items-center justify-between py-4 px-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className={`size-3 rounded-full shadow-sm ${
+              <div key={ticket.id} className="flex items-start justify-between py-4 px-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 rounded-lg transition-colors group">
+                <div className="flex items-start gap-4">
+                  <div className={`mt-1.5 size-3 rounded-full shadow-sm shrink-0 ${
                     ticket.status === 'resolved' || ticket.status === 'closed' ? 'bg-green-500 shadow-green-500/50' :
                     ticket.status === 'in-progress' ? 'bg-blue-500 shadow-blue-500/50' :
                     ticket.status === 'open' ? 'bg-orange-500 shadow-orange-500/50' :
                     'bg-slate-400 shadow-slate-400/50'
                   }`} />
                   <div>
-                    <p className="text-slate-900">{ticket.customerName} - {ticket.subject}</p>
-                    <p className="text-slate-500">{ticket.id} • {ticket.channel} • {formatDate(ticket.createdAt)}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-slate-900 font-medium group-hover:text-blue-700 transition-colors">
+                            {ticket.title || ticket.subject || 'Untitled Ticket'}
+                        </p>
+                        <Badge variant="outline" className="text-xs font-normal border-slate-300 text-slate-500">
+                            {ticket.category}
+                        </Badge>
+                    </div>
+                    
+                    <p className="text-slate-500 text-sm mt-0.5">
+                        <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 mr-2">{ticket.id}</span>
+                        {ticket.customerName} • {ticket.channel} • {formatDate(ticket.createdAt)}
+                    </p>
                   </div>
                 </div>
-                <Badge variant={
-                  ticket.status === 'resolved' || ticket.status === 'closed' ? 'default' :
-                  ticket.status === 'in-progress' ? 'secondary' :
-                  'outline'
-                } className="shadow-sm">
-                  {ticket.status}
-                </Badge>
+                <div className="flex flex-col items-end gap-1">
+                    <Badge variant={
+                    ticket.status === 'resolved' || ticket.status === 'closed' ? 'default' :
+                    ticket.status === 'in-progress' ? 'secondary' :
+                    'outline'
+                    } className="shadow-sm">
+                    {ticket.status}
+                    </Badge>
+                    <span className="text-xs text-slate-400">
+                        {ticket.priority} priority
+                    </span>
+                </div>
               </div>
             ))}
           </div>
@@ -173,30 +189,36 @@ function UrgentTicketCard({ ticket }) {
   const { assignTicket } = useTickets();
 
   return (
-    <div className="flex items-start justify-between p-5 border border-slate-200 rounded-xl hover:bg-slate-50 hover:shadow-md transition-all bg-white">
+    <div className="flex items-start justify-between p-5 border border-slate-200 rounded-xl hover:bg-slate-50 hover:shadow-md transition-all bg-white group">
       <div className="flex-1">
         <div className="flex items-center gap-3 flex-wrap">
           <Badge variant={ticket.priority === 'urgent' ? 'destructive' : 'default'} className="shadow-sm">
             {ticket.priority}
           </Badge>
-          <span className="text-slate-900">{ticket.id}</span>
-          <span className="text-slate-400">•</span>
-          <span>{ticket.customerName}</span>
+          <span className="font-medium text-slate-900 group-hover:text-blue-700 transition-colors">
+              {ticket.title || ticket.subject || 'Untitled Incident'}
+          </span>
+          <span className="text-slate-300">|</span>
+          <span className="text-slate-700 text-sm flex items-center gap-1">
+            <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{ticket.id}</span>
+            {ticket.customerName}
+          </span>
         </div>
-        <p className="text-slate-700 mt-2">{ticket.subject}</p>
-        <p className="text-slate-500 mt-1">{ticket.notes}</p>
+        <p className="text-slate-600 mt-2 text-sm line-clamp-2 pl-1 border-l-2 border-slate-200">
+            {ticket.description || ticket.notes || 'No description provided.'}
+        </p>
       </div>
-      <div className="text-right ml-4 flex flex-col items-end gap-2">
+      <div className="text-right ml-4 flex flex-col items-end gap-2 min-w-[100px]">
         <Badge variant={ticket.status === 'open' ? 'outline' : 'secondary'} className="shadow-sm">
           {ticket.status}
         </Badge>
-        <p className="text-slate-500">Wait: {ticket.waitTime}m</p>
+        <p className="text-slate-500 text-xs">Wait: {ticket.waitTime}m</p>
         {ticket.assignedTo ? (
-          <p className="text-slate-600">{ticket.assignedTo}</p>
+          <p className="text-slate-600 text-sm font-medium">{typeof ticket.assignedTo === 'object' ? ticket.assignedTo.name : ticket.assignedTo}</p>
         ) : (
           <Button 
             size="sm" 
-            className="shadow-sm"
+            className="shadow-sm text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 hover:text-blue-600"
             onClick={() => assignTicket(ticket.id, `Agent ${Math.floor(Math.random() * 7) + 1}`)}
           >
             Assign
