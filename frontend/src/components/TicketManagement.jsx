@@ -94,54 +94,54 @@ export function TicketManagement() {
       <Card className="shadow-md border-slate-200">
         <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
           <div className="flex items-center justify-between">
-            <CardTitle>All Tickets ({filteredTickets.length})</CardTitle>
+            <CardTitle className="text-slate-900">All Tickets ({filteredTickets.length})</CardTitle>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="shadow-sm">
+                <Button className="shadow-sm text-slate-900">
                   <Plus className="size-4 mr-2" />
                   New Ticket
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-lg">
                 <DialogHeader>
-                  <DialogTitle>Create New Ticket</DialogTitle>
+                  <DialogTitle className="text-slate-900">Create New Ticket</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
                   <div>
-                    <Label>Customer Name *</Label>
+                    <Label className="text-slate-700">Customer Name *</Label>
                     <Input
                       placeholder="Enter customer name"
-                      className="mt-1"
+                      className="mt-1 text-slate-900 placeholder:text-slate-400"
                       value={formData.customerName}
                       onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>Customer ID</Label>
+                    <Label className="text-slate-700">Customer ID</Label>
                     <Input
                       placeholder="Auto-generated if empty"
-                      className="mt-1"
+                      className="mt-1 text-slate-900 placeholder:text-slate-400"
                       value={formData.customerId}
                       onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>Subject *</Label>
+                    <Label className="text-slate-700">Subject *</Label>
                     <Input
                       placeholder="Brief description"
-                      className="mt-1"
+                      className="mt-1 text-slate-900 placeholder:text-slate-400"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Category</Label>
+                      <Label className="text-slate-700">Category</Label>
                       <Select
                         value={formData.category}
                         onValueChange={(value) => setFormData({ ...formData, category: value })}
                       >
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger className="mt-1 text-slate-900">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -154,12 +154,12 @@ export function TicketManagement() {
                       </Select>
                     </div>
                     <div>
-                      <Label>Priority</Label>
+                      <Label className="text-slate-700">Priority</Label>
                       <Select
                         value={formData.priority}
                         onValueChange={(value) => setFormData({ ...formData, priority: value })}
                       >
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger className="mt-1 text-slate-900">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -172,12 +172,12 @@ export function TicketManagement() {
                     </div>
                   </div>
                   <div>
-                    <Label>Channel</Label>
+                    <Label className="text-slate-700">Channel</Label>
                     <Select
                       value={formData.channel}
                       onValueChange={(value) => setFormData({ ...formData, channel: value })}
                     >
-                      <SelectTrigger className="mt-1">
+                      <SelectTrigger className="mt-1 text-slate-900">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -189,15 +189,15 @@ export function TicketManagement() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Notes</Label>
+                    <Label className="text-slate-700">Notes</Label>
                     <Textarea
                       placeholder="Additional details"
-                      className="mt-1"
+                      className="mt-1 text-slate-900 placeholder:text-slate-400"
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     />
                   </div>
-                  <Button className="w-full" onClick={handleCreateTicket}>
+                  <Button className="w-full text-slate-900" onClick={handleCreateTicket}>
                     Create Ticket
                   </Button>
                 </div>
@@ -213,11 +213,11 @@ export function TicketManagement() {
                 placeholder="Search by customer, subject, or ticket ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-50 border-slate-200 focus:bg-white"
+                className="pl-10 bg-slate-50 border-slate-200 focus:bg-white text-slate-900 placeholder:text-slate-400"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[180px] bg-slate-50 border-slate-200">
+              <SelectTrigger className="w-full md:w-[180px] bg-slate-50 border-slate-200 text-slate-900">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -230,7 +230,7 @@ export function TicketManagement() {
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-full md:w-[180px] bg-slate-50 border-slate-200">
+              <SelectTrigger className="w-full md:w-[180px] bg-slate-50 border-slate-200 text-slate-900">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -332,7 +332,7 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onAssign, onReso
           <div className="flex lg:flex-col gap-2">
             {ticket.status === 'open' && (
               <Button 
-                className="flex-1 lg:flex-none shadow-sm"
+                className="flex-1 lg:flex-none shadow-sm text-slate-900"
                 onClick={() => {
                   onAssign(ticket.id, `Agent ${Math.floor(Math.random() * 7) + 1}`);
                   toast.success('Ticket assigned');

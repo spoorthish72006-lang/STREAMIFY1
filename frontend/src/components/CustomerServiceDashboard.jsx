@@ -196,7 +196,7 @@ function UrgentTicketCard({ ticket }) {
         ) : (
           <Button 
             size="sm" 
-            className="shadow-sm"
+            className="shadow-sm text-slate-900"
             onClick={() => assignTicket(ticket.id, `Agent ${Math.floor(Math.random() * 7) + 1}`)}
           >
             Assign
