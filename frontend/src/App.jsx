@@ -197,7 +197,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 w-screen">
         <Loader2 className="size-10 text-blue-600 animate-spin" />
       </div>
     );
