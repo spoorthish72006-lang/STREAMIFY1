@@ -8,6 +8,8 @@ import { SatisfactionTracking } from './components/SatisfactionTracking';
 import { AgentAvailability } from './components/AgentAvailability';
 import { LiveMonitoring } from './components/LiveMonitoring';
 import { CallVolumeOverview } from './components/CallVolumeOverview';
+import { AgentDashboard } from './components/AgentDashboard';
+import { AgentTicketManagement } from './components/AgentTicketManagement';
 import { Badge } from './components/ui/badge';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
@@ -27,10 +29,11 @@ import {
   Menu,
   X,
   LogOut,
-  Loader2
+  Loader2,
+  UserCheck
 } from 'lucide-react';
 
-const navigationItems = [
+const adminNavigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'tickets', label: 'Tickets', icon: Ticket },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -41,11 +44,36 @@ const navigationItems = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
+const agentNavigationItems = [
+  { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
+  { id: 'my-tickets', label: 'My Tickets', icon: UserCheck },
+  { id: 'settings', label: 'Settings', icon: Settings },
+];
+
 function AppContent({ user, onLogout }) {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Logic to determine role (mocking for now if not present in user object)
+  // In a real scenario, this would come from user.role
+  const userRole = user.role || 'admin'; 
+  
+  const navigationItems = userRole === 'agent' ? agentNavigationItems : adminNavigationItems;
 
   const renderPage = () => {
+    if (userRole === 'agent') {
+        switch (currentPage) {
+            case 'dashboard':
+                return <AgentDashboard user={user} />;
+            case 'my-tickets':
+                return <AgentTicketManagement user={user} />;
+            case 'settings':
+                return <CustomerSettings />;
+            default:
+                return <AgentDashboard user={user} />;
+        }
+    }
+
     switch (currentPage) {
       case 'dashboard':
         return <CustomerServiceDashboard />;
@@ -84,18 +112,18 @@ function AppContent({ user, onLogout }) {
             </Button>
             <div>
               <h1 className="bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent hidden md:block">
-                Retail Bank Customer Service Portal
+                {userRole === 'agent' ? 'Agent Portal' : 'Retail Bank Customer Service Portal'}
               </h1>
               <h1 className="bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent md:hidden">
-                Customer Service
+                CS Portal
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end text-sm">
+             <div className="hidden md:flex flex-col items-end text-sm">
                <span className="font-medium text-slate-700">{user.fullName}</span>
-               <span className="text-slate-500">{user.email}</span>
+               <span className="text-slate-500 capitalize">{userRole}</span>
             </div>
             
             <Button variant="ghost" size="icon" onClick={onLogout} title="Logout">
@@ -157,6 +185,8 @@ function AppContent({ user, onLogout }) {
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
           <div className="max-w-7xl mx-auto">{renderPage()}</div>
         </main>
+        
+
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 export async function signup( req, res) {
-const {email, password,fullName} =req.body;
+const {email, password,fullName, role} =req.body;
 
 try {
 
@@ -32,6 +32,7 @@ if (!emailRegex.test(email)) {
             email,
             password: hashedPassword,
             fullName,
+            role: role || 'agent',
             profilePic: randomAvatar,
         }
     )
@@ -49,6 +50,7 @@ if (!emailRegex.test(email)) {
         _id: newUser._id,
         email: newUser.email,
         fullName: newUser.fullName,
+        role: newUser.role,
         profilePic: newUser.profilePic
     }});
 } catch (error) {
@@ -85,6 +87,7 @@ export async function login( req, res) {
             _id: user._id,
             fullName: user.fullName,
             email: user.email,
+            role: user.role,
             profilePic: user.profilePic,
         });
 
