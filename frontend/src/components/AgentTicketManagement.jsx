@@ -231,7 +231,7 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onResolve }) {
             {ticket.status !== 'resolved' && ticket.status !== 'closed' && (
               <Dialog open={showResolveDialog} onOpenChange={setShowResolveDialog}>
                 <DialogTrigger asChild>
-                  <Button className="flex-1 lg:flex-none shadow-sm">
+                  <Button className="flex-1 lg:flex-none shadow-sm text-black">
                     <CheckCircle className="size-4 mr-2" /> Resolve
                   </Button>
                 </DialogTrigger>
@@ -247,14 +247,14 @@ function TicketCard({ ticket, getPriorityColor, getStatusColor, onResolve }) {
                           key={score}
                           variant={satisfactionScore === score ? 'default' : 'outline'}
                           size="lg"
-                          className="shadow-sm"
+                          className="shadow-sm text-black"
                           onClick={() => setSatisfactionScore(score)}
                         >
                           {score}
                         </Button>
                       ))}
                     </div>
-                    <Button className="w-full shadow-sm" onClick={handleResolve}>Confirm Resolution</Button>
+                    <Button className="w-full shadow-sm text-black" onClick={handleResolve}>Confirm Resolution</Button>
                   </div>
                 </DialogContent>
               </Dialog>

@@ -1,21 +1,18 @@
 import express from 'express';
 import "dotenv/config";
-import authRoutes from './routes/auth.route.js';
-import agentRoutes from './routes/agentRoutes.js';
-import metricsRoutes from './routes/metricsRoutes.js';
-import settingsRoutes from './routes/settingsRoutes.js';
-import ticketRoutes from './routes/ticketRoutes.js';
-import { connectDB } from './lib/db.js';
+import authRoutes from './routes/auth.route';
+import agentRoutes from './routes/agent.route';
+import metricsRoutes from './routes/metric.route';
+import settingsRoutes from './routes/setting.route';
+import ticketRoutes from './routes/ticket.route';
+import { connectDB } from './lib/db';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
+import { corsMiddleware } from './lib/cors';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
+app.use(corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 

@@ -69,11 +69,7 @@ export function AgentList() {
                      <div key={agent._id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
                         <div className="flex items-center gap-4">
                              <div className="size-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold overflow-hidden">
-                                {agent.profilePic ? (
-                                    <img src={agent.profilePic} alt={agent.fullName} className="w-full h-full object-cover" />
-                                ) : (
                                     getInitials(agent.fullName)
-                                )}
                              </div>
                              <div>
                                  <h4 className="font-medium text-slate-900">{agent.fullName}</h4>

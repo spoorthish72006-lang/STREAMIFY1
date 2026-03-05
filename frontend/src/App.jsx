@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { TicketProvider } from './contexts/TicketContext';
 import { CustomerServiceDashboard } from './components/CustomerServiceDashboard';
 import { TicketManagement } from './components/TicketManagement';
@@ -11,14 +12,12 @@ import { CallVolumeOverview } from './components/CallVolumeOverview';
 import { AgentDashboard } from './components/AgentDashboard';
 import { AgentTicketManagement } from './components/AgentTicketManagement';
 import { AgentList } from './components/AgentList';
-import { Badge } from './components/ui/badge';
-import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { authApi } from './lib/api';
+import { Button } from './components/ui/button';
 import {
-  AlertCircle,
   LayoutDashboard,
   Ticket,
   BarChart3,
@@ -35,67 +34,28 @@ import {
 } from 'lucide-react';
 
 const adminNavigationItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'tickets', label: 'Tickets', icon: Ticket },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'satisfaction', label: 'Satisfaction', icon: Star },
-  { id: 'agents', label: 'Agents', icon: Users },
-  { id: 'monitoring', label: 'Live Monitoring', icon: Activity },
-  { id: 'call-volume', label: 'Call Volume', icon: PhoneCall },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { id: 'tickets', label: 'Tickets', icon: Ticket, path: '/tickets' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
+  { id: 'satisfaction', label: 'Satisfaction', icon: Star, path: '/satisfaction' },
+  { id: 'agents', label: 'Agents', icon: Users, path: '/agents' },
+  { id: 'monitoring', label: 'Live Monitoring', icon: Activity, path: '/monitoring' },
+  { id: 'call-volume', label: 'Call Volume', icon: PhoneCall, path: '/call-volume' },
+  { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 const agentNavigationItems = [
-  { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
-  { id: 'my-tickets', label: 'My Tickets', icon: UserCheck },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard, path: '/' },
+  { id: 'my-tickets', label: 'My Tickets', icon: UserCheck, path: '/my-tickets' },
+  { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 function AppContent({ user, onLogout }) {
-  const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
   
-  // Logic to determine role (mocking for now if not present in user object)
-  // In a real scenario, this would come from user.role
   const userRole = user.role || 'admin'; 
-  
   const navigationItems = userRole === 'agent' ? agentNavigationItems : adminNavigationItems;
-
-  const renderPage = () => {
-    if (userRole === 'agent') {
-        switch (currentPage) {
-            case 'dashboard':
-                return <AgentDashboard user={user} />;
-            case 'my-tickets':
-                return <AgentTicketManagement user={user} />;
-            case 'settings':
-                return <CustomerSettings />;
-            default:
-                return <AgentDashboard user={user} />;
-        }
-    }
-
-    switch (currentPage) {
-      case 'dashboard':
-        return <CustomerServiceDashboard />;
-      case 'tickets':
-        return <TicketManagement />;
-      case 'analytics':
-        return <AnalyticsDashboard />;
-      case 'settings':
-        return <CustomerSettings />;
-      case 'satisfaction':
-        return <SatisfactionTracking />;
-      case 'agents':
-        return <AgentList />;
-      case 'monitoring':
-        return <LiveMonitoring />;
-      case 'call-volume':
-        return <CallVolumeOverview />;
-      default:
-        return <CustomerServiceDashboard />;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 w-screen">
@@ -147,16 +107,13 @@ function AppContent({ user, onLogout }) {
           <nav className="p-4 space-y-2">
             {navigationItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPage === item.id;
 
               return (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => {
-                    setCurrentPage(item.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={({ isActive }) => `
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg
                     transition-all duration-200
                     ${
@@ -165,11 +122,11 @@ function AppContent({ user, onLogout }) {
                         : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }
                   `}
-                  style={{backgroundColor: "#ffffff40", color: "#000"}}
+                  style={({ isActive }) => isActive ? {} : {backgroundColor: "#ffffff40", color: "#000"}}
                 >
                   <Icon className="size-5" />
-                  <span className='text-black'>{item.label}</span>
-                </button>
+                  <span className={location.pathname === item.path ? 'text-white' : 'text-black'}>{item.label}</span>
+                </NavLink>
               );
             })}
           </nav>
@@ -185,10 +142,31 @@ function AppContent({ user, onLogout }) {
 
         {/* Main Content */}
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
-          <div className="max-w-7xl mx-auto">{renderPage()}</div>
+          <div className="max-w-7xl mx-auto">
+            <Routes>
+              {userRole === 'agent' ? (
+                <>
+                  <Route path="/" element={<AgentDashboard user={user} />} />
+                  <Route path="/my-tickets" element={<AgentTicketManagement user={user} />} />
+                  <Route path="/settings" element={<CustomerSettings />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </>
+              ) : (
+                <>
+                  <Route path="/" element={<CustomerServiceDashboard />} />
+                  <Route path="/tickets" element={<TicketManagement />} />
+                  <Route path="/analytics" element={<AnalyticsDashboard />} />
+                  <Route path="/settings" element={<CustomerSettings />} />
+                  <Route path="/satisfaction" element={<SatisfactionTracking />} />
+                  <Route path="/agents" element={<AgentList />} />
+                  <Route path="/monitoring" element={<LiveMonitoring />} />
+                  <Route path="/call-volume" element={<CallVolumeOverview />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </>
+              )}
+            </Routes>
+          </div>
         </main>
-        
-
       </div>
     </div>
   );
@@ -235,23 +213,22 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <>
-        <Toaster />
-        {authView === 'login' ? (
-          <LoginPage onLogin={handleLogin} onSwitchToSignup={() => setAuthView('signup')} />
-        ) : (
-          <SignupPage onLogin={handleLogin} onSwitchToLogin={() => setAuthView('login')} />
-        )}
-      </>
-    );
-  }
-
   return (
-    <TicketProvider>
-      <Toaster />
-      <AppContent user={user} onLogout={handleLogout} />
-    </TicketProvider>
+    <BrowserRouter>
+      <TicketProvider>
+        <Toaster />
+        {!user ? (
+          <>
+            {authView === 'login' ? (
+              <LoginPage onLogin={handleLogin} onSwitchToSignup={() => setAuthView('signup')} />
+            ) : (
+              <SignupPage onLogin={handleLogin} onSwitchToLogin={() => setAuthView('login')} />
+            )}
+          </>
+        ) : (
+          <AppContent user={user} onLogout={handleLogout} />
+        )}
+      </TicketProvider>
+    </BrowserRouter>
   );
 }

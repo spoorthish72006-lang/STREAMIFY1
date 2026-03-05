@@ -1,72 +1,75 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const userSchema = new mongoose.Schema({
-  fullName: {
-    type: String,
-    required: true
+const userSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["admin", "agent"],
+      default: "agent",
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
+    profilePic: {
+      type: String,
+      default: "",
+    },
+    nativeLanguage: {
+      type: String,
+      default: "",
+    },
+    learningLanguage: {
+      type: String,
+      default: "",
+    },
+    location: {
+      type: String,
+      default: "",
+    },
+    isOnboareded: {
+      type: Boolean,
+      default: false,
+    },
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true
+  {
+    timestamps: true,
   },
-  password: {
-    type: String,
-    required: true
-
-  },
-  role: {
-    type: String,
-    enum: ['admin', 'agent'],
-    default: 'agent'
-  },
-  bio: {
-    type: String,
-    default: "",
-}, 
-profilePic:{
-    type: String,
-    default: "",
-},
-nativeLanguage:{
-    type: String,
-    default: "",    
-},
-learningLanguage:{
-    type: String,
-    default: "",    
-},  
-location:{
-    type: String,
-    default: "",    
-},
-isOnboareded:{
-    type: Boolean,
-    default: false,
-},
-friends:[{
-    type:mongoose.Schema.Types.ObjectId,
-    ref: "User",
-}
-],    
-}, {   
-  timestamps: true
-});
+);
 
 const User = mongoose.model("User", userSchema);
 //per hook
 //john@gmail.com 123456 => $?4dasmlda_#?$
 userSchema.pre("save", async function (next) {
-    if(!this.isModified("password")){
-        return next();
-    }
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
+  if (!this.isModified("password")) {
+    return next();
+  }
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 export default User;

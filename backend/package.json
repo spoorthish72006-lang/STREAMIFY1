@@ -4,14 +4,15 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "tsx watch src/server.js",
+    "build": "tsup",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
-  "type":"module",
+  "type": "module",
   "license": "ISC",
-  
-   "dependencies": {
+  "dependencies": {
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -22,6 +23,9 @@
     "stream-chat": "^8.60.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }

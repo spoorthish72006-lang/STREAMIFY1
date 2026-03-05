@@ -1,5 +1,5 @@
 import express from "express";
-import auth from "../middleware/authMiddleware.js";
+import auth from "../middleware/auth.middleware";
 import {
   createTicket,
   assignTicket,
@@ -8,7 +8,7 @@ import {
   getAllTickets,
   filterTickets,
   deleteTicket
-} from "../controller/ticketController.js";
+} from "../controller/ticket.controller";
 
 const router = express.Router();
 
